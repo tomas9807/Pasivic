@@ -47,6 +47,22 @@ def is_acc(*,acc_1,acc_2,meta):
 
     return None
 
+def is_mov(var,meta):
+    var = str(var)
+    if pd.isnull(var): return None
+    pattern = meta.REGEX_PATTERNS[meta.MOV]
+    regex = pattern.search(var)
+    if regex:
+        mov = regex.groupdict()
+        if not mov.get('point'):
+            if len(mov.get('significant'))>3:
+                return float(mov['significant'])/100    
+            else: return None
+        elif  mov.get('decimal'):
+            if len(mov.get('decimal'))<2:
+                return  format(float(''.join(mov.values())),'.2f')
+            else : return round(float(''.join(mov.values())),2)
+
 
 
 

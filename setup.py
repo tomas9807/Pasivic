@@ -27,11 +27,10 @@ def setup_socios(path,meta):
         simple = database_write.Simple(cur)
         
         patterns = meta.DEFAULT_PATTERNS[meta.SOC]
-        pname = patterns[meta.NAME]
-        pcedula = patterns[meta.CED]
-        pacc_1 = patterns[meta.ACC1]
-        pacc_2 = patterns[meta.ACC2]
-        for row in df.itertuples():
+        patterns = [patterns[meta.NAME],patterns[meta.CED],patterns[meta.ACC1], patterns[meta.ACC2]]
+ 
+  
+        for name,cedula,acc_1,acc_2 in df.iloc[:,[patterns]]:
             
             name = check_data.is_name(row[pname],meta)
             cedula = check_data.is_cedula(row[pcedula],meta)
@@ -64,9 +63,9 @@ def setup_empleados_and_socios(path,meta,*,key):
         col='es_obrero' if key==meta.OBR else 'es_empleado'
         new_var = 1
         where_var = 'numero_cedula'
-        ced_col = df.iloc[:]
-
-            cedula = check_data.is_cedula(row[pattern],meta,key=key)
+        ced_col = df.iloc[:,pattern]
+        for cedula in ced_col.values:
+            cedula = check_data.is_cedula(cedula,meta,key=key)
             if cedula:
                 try:
                     simple.update_where(
@@ -79,14 +78,20 @@ def setup_empleados_and_socios(path,meta,*,key):
                 except sqlite3.Error as e:
                     print('ha ocurrido un error al insertar un socio en base de datos :',e)
 
-def read_movs(list_of_files):
+def read_movs(meta,*,list_of_files,mov_type):
     for file in list_of_files:
         try:
             df = read_files.read(file)
         except ValueError as e:
             print(e)
         else:
-            for row in df.itertuples():
+            patterns = meta.DEFAULT_PATTERNS[meta.MOV]
+
+            for cedula,mov in df.iloc[:,[patterns[meta.CED],patterns[mov_type]]]:
+                cedula = check_data.is_cedula(cedula,meta,key=mov_type)
+                
+
+
 
 
 
