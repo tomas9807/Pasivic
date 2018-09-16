@@ -30,13 +30,11 @@ def setup_socios(path,meta):
         patterns = [patterns[meta.NAME],patterns[meta.CED],patterns[meta.ACC1], patterns[meta.ACC2]]
  
   
-        for name,cedula,acc_1,acc_2 in df.iloc[:,[patterns]]:
+        for name,cedula,acc_1,acc_2 in df[[patterns]]:
             
-            name = check_data.is_name(row[pname],meta)
-            cedula = check_data.is_cedula(row[pcedula],meta)
+            name = check_data.is_name(name,meta)
+            cedula = check_data.is_cedula(cedula,meta)
 
-            acc_1 = row[pacc_1]
-            acc_2 = row[pacc_2]
             acc= check_data.is_acc(acc_1=acc_1,acc_2=acc_2,meta=meta)
             
             if name and cedula and acc:
@@ -87,7 +85,7 @@ def read_movs(meta,*,list_of_files,mov_type):
         else:
             patterns = meta.DEFAULT_PATTERNS[meta.MOV]
 
-            for cedula,mov in df.iloc[:,[patterns[meta.CED],patterns[mov_type]]]:
+            for cedula,mov in df[[patterns[meta.CED],patterns[mov_type]]]:
                 cedula = check_data.is_cedula(cedula,meta,key=mov_type)
                 
 
