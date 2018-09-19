@@ -6,12 +6,18 @@ def is_cedula(var,meta,*,key=None):
     if key is None:
         if pd.isnull(var): return None
         if var.isalnum(): return None #it means it has not delimiter like v-5965 , it has no "-"
-        char,num = re.split(r'[-._]+',var)
-        if char=='V' or char=='E':
-            if num.isdigit():
-                if num[0]=='0':
-                    num = re.search(pattern,num).group(1)
-                return {meta.CED_CHAR:char,meta.CED:num}  #right reponse
+
+        try: char,num = re.split(r'[-._]+',var)
+        except ValueError as e:
+            pass
+            #print(var,e)
+
+        else:
+            if char=='V' or char=='E':
+                if num.isdigit():
+                    if num[0]=='0':
+                        num = re.search(pattern,num).group(1)
+                    return {meta.CED_CHAR:char,meta.CED:num}  #right reponse
     else:
         if var.isdigit(): return var
         else: 
@@ -54,6 +60,7 @@ def is_mov(var,meta):
     regex = pattern.search(var)
     if regex:
         mov = regex.groupdict()
+        
         if not mov.get('point'):
             if len(mov.get('significant'))>3:
                 return float(mov['significant'])/100    
@@ -62,6 +69,10 @@ def is_mov(var,meta):
             if len(mov.get('decimal'))<2:
                 return  format(float(''.join(mov.values())),'.2f')
             else : return round(float(''.join(mov.values())),2)
+
+def get_date(meta,*,file_name,key):
+    return meta.REGEX_PATTERNS[key].search(file_name)
+
 
 
 

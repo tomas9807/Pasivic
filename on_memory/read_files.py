@@ -11,7 +11,8 @@ def read(path):
         df = pd.read_excel(path,header=None,)
         
     elif path.lower().endswith('csv'):
-        df = pd.read_csv(path)
+        df = pd.read_csv(path, encoding="ISO-8859-1",delimiter=';')
+        
     
         
     else:
