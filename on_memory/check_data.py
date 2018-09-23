@@ -22,7 +22,7 @@ def is_cedula(var,meta,*,key=None):
         if var.isdigit(): return var
         else: 
             regex = re.search(pattern,var)
-            return regex.group(1) if regex else None
+            return regex.group(1) or None
     
         
 
