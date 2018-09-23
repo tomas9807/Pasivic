@@ -55,23 +55,38 @@ def is_acc(*,acc_1,acc_2,meta):
 
 def is_mov(var,meta):
     var = str(var)
+    
     if pd.isnull(var): return None
     pattern = meta.REGEX_PATTERNS[meta.MOV]
     regex = pattern.search(var)
     if regex:
         mov = regex.groupdict()
-        
+        if mov['point'] == ',': mov['point']='.'
         if not mov.get('point'):
             if len(mov.get('significant'))>3:
+            
                 return float(mov['significant'])/100    
             else: return None
         elif  mov.get('decimal'):
             if len(mov.get('decimal'))<2:
+           
                 return  format(float(''.join(mov.values())),'.2f')
             else : return round(float(''.join(mov.values())),2)
 
 def get_date(meta,*,file_name,key):
-    return meta.REGEX_PATTERNS[key].search(file_name)
+    date = meta.REGEX_PATTERNS[key].search(file_name).groupdict()
+    
+    if not date: return date 
+    elif key==meta.EMP:
+        r = range(1,13) #from 1 to 12   
+        if int(date['month']) in r: return ''.join(date.values())   
+        else: raise ValueError(f'date of {file_name} is wrong not in bounds 1-12 ')
+    elif key==meta.OBR:
+     
+        r = range(1,53)
+        if int(date['sem']) in r : return ''.join(date.values())  
+        else: raise ValueError(f'date of {file_name} is wrong not in bound 1-52')
+
 
 
 

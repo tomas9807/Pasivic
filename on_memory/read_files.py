@@ -6,11 +6,13 @@ import os
 
     
 def read(path):
+    
 
     if path.lower().endswith(('xls','xlsx')):
         df = pd.read_excel(path,header=None,)
         
     elif path.lower().endswith('csv'):
+        
         df = pd.read_csv(path, encoding="ISO-8859-1",delimiter=';')
         
     

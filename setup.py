@@ -81,10 +81,9 @@ def read_movs(meta,*,list_of_files,mov_type,key):
     with conn:
         cur = conn.cursor()
         mov_string = 'aportes' if mov_type==meta.APOR else 'deducciones'
-        key_string = 'obreros_ 'if key==meta.OBR else 'empleados_' #obrero or empleado
+        key_string = 'obreros_'if key==meta.OBR else 'empleados_' #obrero or empleado
         table_name =  key_string + mov_string
-        quin_or_sem = 'sem' if key==meta.OBR else 'quin'
-
+        quin_or_sem = 'semana_' if key==meta.OBR else 'quincena_'
         cur.execute(
             f"""
             create table if not exists {table_name}(
@@ -96,79 +95,52 @@ def read_movs(meta,*,list_of_files,mov_type,key):
             )
         patterns = meta.DEFAULT_PATTERNS[meta.MOV]
         patterns = [patterns[meta.CED],patterns[mov_type]]
-        
+       
         for file in list_of_files:
             try:
                 df = read_files.read(file)
             except ValueError as e:
-                print(e)
+                raise e
             else:
-                date = check_data.get_date(meta,file_name=file,key=key)
-                date = ''.join(date.groupdict().values())
-                if date:
+                date = check_data.get_date(meta,file_name=os.path.basename(file),key=key)
+                try:
+                    if date:
 
-                    date = quin_or_sem + date
-                    cur.execute(f'alter table {table_name} add column {date} text default null')
-
-                    for cedula,mov in df.iloc[:,patterns].values:
-                        cedula = check_data.is_cedula(cedula,meta,key=mov_type)
-                        mov = check_data.is_mov(mov,meta)
-                    
-                        if cedula and mov and date:
-                            data = cur.execute('select id from socios where numero_cedula=?',(cedula,)).fetchone()
-                            if data:
-                                socio_id = data[0]
-                                
-                            
-                                if cur.execute(f'select socio_id from {table_name} where socio_id=?',(socio_id,)).fetchone():
-                                    #the socio_id has already been created in the database so update its row
-                                    cur.execute(f"""
-                                        update {table_name}
-                                        set {date}=?
-                                        where socio_id=?
-
-                                        """,(mov,socio_id))
-
-                                else: 
-                                    cur.execute(f"""
-                                        insert into {table_name}(socio_id,{date})
-                                        values(?,?)
-
-                                        """,(socio_id,mov))
-
-
-
-
+                        date = quin_or_sem + date
+                        
+                        cur.execute(f'alter table {table_name} add column {date} text default null')
                 
+                        for idx,values in enumerate(df.iloc[:,patterns].values):
+                            cedula,mov = values
+                            cedula = check_data.is_cedula(cedula,meta,key=mov_type)
+                            mov = check_data.is_mov(mov,meta)
+                            try:
+                                if cedula and mov:
+                                    data = cur.execute('select id from socios where numero_cedula=?',(cedula,)).fetchone()
+                                    if data:
+                                        socio_id = data[0]
+                                        
+                                    
+                                        if cur.execute(f'select socio_id from {table_name} where socio_id=?',(socio_id,)).fetchone():
+                                            #the socio_id has already been created in the database so update its row
+                                            cur.execute(f"""
+                                                update {table_name}
+                                                set {date}=?
+                                                where socio_id=?
 
+                                                """,(mov,socio_id))
 
+                                        else: 
+                                            cur.execute(f"""
+                                                insert into {table_name}(socio_id,{date})
+                                                values(?,?)
 
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-        
-
-
-
-
-    
-
-
-    
-def read_socios_mov(path): pass
-
-def read_socios_obr(path): pass
-
+                                                """,(socio_id,mov))
+                                else: 
+                                    
+                                    raise ValueError(f'something went wrong in {file} , LINE {idx+1}. Could not read { "cedula," if not cedula else "" } {mov_string if not mov else ""}. \n')
+                            except ValueError as e:
+                                #print(e)
+                                pass
+                except Exception as e:
+                    print(e)        

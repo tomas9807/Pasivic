@@ -1,0 +1,20 @@
+
+{
+    "LEN_SOCIOS":5,
+    "LEN_MONTO_TOTAL":14,
+    "HEAD_CONST" :"01",
+    "CONST":"02",
+    "FONDO":"040013",
+    "NUM_OFFICINA":"150",
+    "LEN_HEAD":60,
+    "LEN_CEDULA":10,
+    "LEN_MOV_INDIV":5,
+    
+    "ZEROS_CONTENT":"000000000",
+    
+    "TIPO_MOV":{
+        "APERTURA":"002000",
+        "APORTE":"001000",
+        "DEDUC":"003000"
+    }
+    }
