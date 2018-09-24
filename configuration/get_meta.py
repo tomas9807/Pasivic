@@ -10,16 +10,18 @@ class EasyManipulation():
         else:
             month = ['15','30']
 
-            for i in range(1,53):
-                if i==4: 
-                    yield 'quin_2904'
+            for i in range(1,25):
+                if i==2: 
+                    yield word + '1502'
+                    yield word + '2902'
                 else:
                     str_i = str(i)
                     if i<10:
-                        str_i= '0'+str_i 
-                    digits= month[0] + str_i if i % 2 else month[1] + str_i
-                    yield word + digits
+                        str_i= '0'+str_i
+                    yield word + month[0] + str_i
+                    yield word + month[1] + str_i
 
+                  
 
 
 
