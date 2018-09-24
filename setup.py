@@ -1,6 +1,4 @@
-
-
-from database import read as database_read,write as database_write
+from database import read as database_read 
 from on_memory import check_data,print_files,read_files
 import sqlite3
 import os
@@ -80,16 +78,19 @@ def read_movs(meta,*,list_of_files,mov_type,key):
     conn = database_read.connect()
     with conn:
         cur = conn.cursor()
-        mov_string = 'aportes' if mov_type==meta.APOR else 'deducciones'
-        key_string = 'obreros_'if key==meta.OBR else 'empleados_' #obrero or empleado
-        table_name =  key_string + mov_string
-        quin_or_sem = 'semana_' if key==meta.OBR else 'quincena_'
+        #obrero or empleado
+        keyword = check_data.get_date_keyword(meta,key)
+        table_name =  check_data.get_table_name(meta,key,mov_type)
+      
+        dates_columns = meta.get_date_column_names(key=key,word=keyword)
+ 
         cur.execute(
             f"""
             create table if not exists {table_name}(
             id integer primary key,
             socio_id integer unique not null,
-            foreign key (socio_id) references socios(id) ON DELETE CASCADE 
+            {''.join(date+' real,' for date in dates_columns)}
+            foreign key (socio_id) references socios(id) ON DELETE CASCADE
             )
             """
             )
@@ -106,9 +107,8 @@ def read_movs(meta,*,list_of_files,mov_type,key):
                 try:
                     if date:
 
-                        date = quin_or_sem + date
                         
-                        cur.execute(f'alter table {table_name} add column {date} text default null')
+                        
                 
                         for idx,values in enumerate(df.iloc[:,patterns].values):
                             cedula,mov = values
@@ -119,7 +119,7 @@ def read_movs(meta,*,list_of_files,mov_type,key):
                                     data = cur.execute('select id from socios where numero_cedula=?',(cedula,)).fetchone()
                                     if data:
                                         socio_id = data[0]
-                                        
+                                        date = keyword + date
                                     
                                         if cur.execute(f'select socio_id from {table_name} where socio_id=?',(socio_id,)).fetchone():
                                             #the socio_id has already been created in the database so update its row
@@ -138,7 +138,7 @@ def read_movs(meta,*,list_of_files,mov_type,key):
                                                 """,(socio_id,mov))
                                 else: 
                                     
-                                    raise ValueError(f'something went wrong in {file} , LINE {idx+1}. Could not read { "cedula," if not cedula else "" } {mov_string if not mov else ""}. \n')
+                                    raise ValueError(f'something went wrong in {file} , LINE {idx+1}. Could not read { "cedula," if not cedula else "" } {"mov," if not mov else ""}. \n')
                             except ValueError as e:
                                 #print(e)
                                 pass

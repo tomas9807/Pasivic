@@ -87,8 +87,12 @@ def get_date(meta,*,file_name,key):
         if int(date['sem']) in r : return ''.join(date.values())  
         else: raise ValueError(f'date of {file_name} is wrong not in bound 1-52')
 
-
-
+def get_date_keyword(meta,key):
+    return 'quin_' if key==meta.EMP else 'sem_'
+def get_table_name(meta,key,mov_type):
+    mov_string = 'aportes' if mov_type==meta.APOR else 'deducciones'
+    key_string = 'obreros_'if key==meta.OBR else 'empleados_'
+    return key_string + mov_string
 
 
 

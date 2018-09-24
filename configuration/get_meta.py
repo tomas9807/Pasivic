@@ -1,6 +1,30 @@
 import re
 import json
 class EasyManipulation():
+
+
+    def get_date_column_names(self,*,key,word):   
+        if key==self.OBR: 
+            for i in range(1,13):
+                yield word+str(i)
+        else:
+            month = ['15','30']
+
+            for i in range(1,53):
+                if i==4: 
+                    yield 'quin_2904'
+                else:
+                    str_i = str(i)
+                    if i<10:
+                        str_i= '0'+str_i 
+                    digits= month[0] + str_i if i % 2 else month[1] + str_i
+                    yield word + digits
+
+
+
+
+            
+
  
     def set_default_patterns(self):
     
